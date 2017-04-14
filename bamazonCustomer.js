@@ -52,12 +52,20 @@ function purchase () {
       // connecting the the database to check for availability and update stock quantity
       connection.query("SELECT stock_quantity, price FROM products WHERE id=" + item, function (err,res) {
         var stockQuantity = res[0].stock_quantity;
+        var total = res[0].price * quantity;
+        var newStock = stockQuantity - quantity;
 
-        if (stockQuantity - quantity < 0){
-          console.log("Insufficient quantity!");
+        // if their quantity exceeds the inventory the order does not go through
+        if (newStock < 0){
+          console.log("Insufficient quantity! Try again.");
+          purchase();
         }
+        // if the inventory is available, quantity in the database is updated
+        // and the customer is given their total
         else {
-          console.log("Success! Your order is on its way.");
+          connection.query("UPDATE products SET stock_quantity=" + newStock + "WHERE item_id=" + item, function (err,res) {
+          });
+          console.log("Success! Your total is $" + total);
         }
 
       });
